@@ -1,0 +1,492 @@
+ <!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>موقع تعليمي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --primary:#007bff;        /* أزرق (العربية) */
+      --primary-dark:#0056b3;
+      --bg:#e6f0ff;
+      --text:#111;
+      --card:#fff;
+      --muted:#666;
+      --shadow:0 8px 24px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    header{background:var(--primary);color:#fff;padding:14px 16px;text-align:center;font-size:22px;position:sticky;top:0;z-index:10}
+    .topbar{
+      display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;
+      background:var(--primary-dark);padding:8px 10px;color:#fff
+    }
+    .topbar select{padding:6px 10px;border-radius:8px;border:none}
+    section{display:none;padding:22px}
+    .container{
+      max-width:430px;margin:auto;background:var(--card);padding:22px;border-radius:14px;
+      box-shadow:var(--shadow);text-align:center
+    }
+    input,button,textarea,select{
+      width:92%;padding:11px;margin:8px 0;border-radius:10px;border:1px solid #cfd6e4;font-size:15px
+    }
+    textarea{height:140px;resize:vertical}
+    button{
+      background:var(--primary);color:#fff;border:none;cursor:pointer;font-weight:bold
+    }
+    button:hover{background:var(--primary-dark)}
+    a{color:var(--primary);cursor:pointer;text-decoration:none}
+    a:hover{text-decoration:underline}
+    nav{
+      display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap;
+      background:var(--primary-dark);padding:10px;color:#fff;border-radius:12px;margin:0 auto 18px;max-width:980px
+    }
+    nav a{color:#fff;font-weight:bold}
+    .inner{max-width:980px;margin:0 auto}
+    .muted{color:var(--muted);font-size:13px}
+    ul.feature{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    ul.feature li{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow)}
+    .rtl{direction:rtl;text-align:right}
+    .ltr{direction:ltr;text-align:left}
+  </style>
+</head>
+<body>
+
+  <!-- الرأس + اختيار اللغة -->
+  <header id="site-title">موقع تعليمي</header>
+  <div class="topbar">
+    <span id="lang-label">اللغة:</span>
+    <select id="lang" onchange="setLanguage(this.value)">
+      <option value="ar" selected>العربية</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
+
+  <!-- تسجيل الدخول -->
+  <section id="login-section" style="display:block">
+    <div class="container">
+      <h2 data-i18n="login_title">تسجيل الدخول</h2>
+      <input type="email" id="login-email" data-i18n-ph="email_ph" placeholder="البريد الإلكتروني" />
+      <input type="password" id="login-password" data-i18n-ph="password_ph" placeholder="كلمة المرور" />
+      <label class="muted"><input type="checkbox" id="remember" /> <span data-i18n="remember">تذكرني</span></label>
+      <button onclick="login()" data-i18n="login_btn">دخول</button>
+      <p><span data-i18n="no_account">ليس لديك حساب؟</span> <a onclick="gotoRegister()" data-i18n="create_account">إنشاء حساب</a></p>
+    </div>
+  </section>
+
+  <!-- إنشاء حساب -->
+  <section id="register-section">
+    <div class="container">
+      <h2 data-i18n="register_title">إنشاء حساب</h2>
+      <div class="row">
+        <input type="text" id="reg-name" data-i18n-ph="name_ph" placeholder="الاسم" />
+        <input type="text" id="reg-lastname" data-i18n-ph="lastname_ph" placeholder="اللقب" />
+      </div>
+      <input type="date" id="birthdate" />
+      <input type="email" id="reg-email" data-i18n-ph="email_ph" placeholder="البريد الإلكتروني" />
+      <input type="password" id="reg-password" data-i18n-ph="password_rules" placeholder="كلمة المرور (6+ أحرف مع أرقام)" />
+      <input type="password" id="reg-confirm-password" data-i18n-ph="confirm_password_ph" placeholder="تأكيد كلمة المرور" />
+
+      <!-- اختبار الإنسان بالأرقام الفرنسية -->
+      <p data-i18n="captcha_title">أكتب الرقم التالي بالكلمة الفرنسية:</p>
+      <p id="captcha-question" style="font-weight:bold;font-size:18px"></p>
+      <input type="text" id="captcha-answer" data-i18n-ph="captcha_ph" placeholder="اكتب الكلمة هنا" />
+
+      <button onclick="register()" data-i18n="register_btn">تسجيل</button>
+      <p><a onclick="showSection('login-section')" data-i18n="back_to_login">العودة لتسجيل الدخول</a></p>
+    </div>
+  </section>
+
+  <!-- الصفحة الداخلية -->
+  <section id="main-section">
+    <nav>
+      <a onclick="showInnerPage('official-page')" data-i18n="nav_official">الصفحة الرسمية</a>
+      <a onclick="showInnerPage('services-page')" data-i18n="nav_services">خدماتي</a>
+      <a onclick="showInnerPage('contact-page')" data-i18n="nav_contact">اتصل بنا</a>
+      <a onclick="logout()" data-i18n="nav_logout">تسجيل الخروج</a>
+    </nav>
+
+    <div class="inner">
+      <!-- الصفحة الرسمية -->
+      <div id="official-page" class="inner-page" style="display:block">
+        <h2 data-i18n="official_title">أهلاً بك في موقعنا التعليمي</h2>
+        <p data-i18n="official_paragraph" class="rtl">
+          التعليم هو أساس تقدم الأمم وازدهارها، ومن خلاله نكتسب المهارات والمعرفة التي تؤهلنا لمواجهة تحديات المستقبل.
+          في موقعنا نسعى لتوفير محتوى تعليمي هادف وسهل الوصول للجميع. نقدم مقالات، ودروسًا مصوّرة، وتمارين تفاعلية
+          تساعد المتعلم على تطوير ذاته بخطوات واضحة ومدروسة. رؤيتنا أن يكون التعلم متاحًا للجميع، بلا قيود مكان أو زمان.
+        </p>
+      </div>
+
+      <!-- خدماتي -->
+      <div id="services-page" class="inner-page" style="display:none">
+        <h2 data-i18n="services_title">خدماتي</h2>
+        <ul id="services-list" class="feature"></ul>
+      </div>
+
+      <!-- اتصل بنا -->
+      <div id="contact-page" class="inner-page" style="display:none">
+        <h2 data-i18n="contact_title">اتصل بنا</h2>
+        <textarea id="contact-msg" data-i18n-ph="contact_ph" placeholder="اكتب رسالتك هنا..."></textarea>
+        <button onclick="sendMessage()" data-i18n="contact_send">إرسال</button>
+        <p id="contact-status" class="muted"></p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* =========================
+       i18n النصوص ثلاث لغات
+       ========================= */
+    const i18n = {
+      ar:{
+        site_title:"موقع تعليمي",
+        lang_label:"اللغة:",
+        login_title:"تسجيل الدخول",
+        email_ph:"البريد الإلكتروني",
+        password_ph:"كلمة المرور",
+        remember:"تذكرني",
+        login_btn:"دخول",
+        no_account:"ليس لديك حساب؟",
+        create_account:"إنشاء حساب",
+        register_title:"إنشاء حساب",
+        name_ph:"الاسم",
+        lastname_ph:"اللقب",
+        password_rules:"كلمة المرور (6+ أحرف مع أرقام)",
+        confirm_password_ph:"تأكيد كلمة المرور",
+        captcha_title:"أكتب الرقم التالي بالكلمة الفرنسية:",
+        captcha_equals:"= ؟ (بالفرنسية)",
+        captcha_ph:"اكتب الكلمة هنا",
+        register_btn:"تسجيل",
+        back_to_login:"العودة لتسجيل الدخول",
+        nav_official:"الصفحة الرسمية",
+        nav_services:"خدماتي",
+        nav_contact:"اتصل بنا",
+        nav_logout:"تسجيل الخروج",
+        official_title:"أهلاً بك في موقعنا التعليمي",
+        official_paragraph:
+          "التعليم هو أساس تقدم الأمم وازدهارها، ومن خلاله نكتسب المهارات والمعرفة التي تؤهلنا لمواجهة تحديات المستقبل. " +
+          "في موقعنا نسعى لتوفير محتوى تعليمي هادف وسهل الوصول للجميع. نقدم مقالات، ودروسًا مصوّرة، وتمارين تفاعلية " +
+          "تساعد المتعلم على تطوير ذاته بخطوات واضحة ومدروسة. رؤيتنا أن يكون التعلم متاحًا للجميع، بلا قيود مكان أو زمان.",
+        services_title:"خدماتي",
+        services_list:[
+          "📚 دروس مجانية عبر الإنترنت",
+          "📝 اختبارات تدريبية",
+          "🎥 فيديوهات تعليمية",
+          "💬 منتدى للنقاش وتبادل الخبرات",
+          "🎯 خطط تعلم مخصّصة"
+        ],
+        contact_title:"اتصل بنا",
+        contact_ph:"اكتب رسالتك هنا...",
+        contact_send:"إرسال",
+        contact_ok:"تم إرسال رسالتك! سنعاود التواصل قريبًا.",
+        // رسائل تنبيه
+        err_email:"الرجاء إدخال بريد إلكتروني صحيح",
+        err_pw:"كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل وتشمل أرقام وحروف",
+        err_pw_match:"تأكيد كلمة المرور غير مطابق",
+        err_age:"يجب أن يكون عمرك 10 سنوات على الأقل للتسجيل",
+        err_captcha:"إجابة اختبار التحقق غير صحيحة",
+        reg_ok:"تم إنشاء الحساب بنجاح!",
+        login_err:"البريد الإلكتروني أو كلمة المرور غير صحيحة"
+      },
+      en:{
+        site_title:"Educational Site",
+        lang_label:"Language:",
+        login_title:"Sign In",
+        email_ph:"Email",
+        password_ph:"Password",
+        remember:"Remember me",
+        login_btn:"Log In",
+        no_account:"Don't have an account?",
+        create_account:"Create Account",
+        register_title:"Create Account",
+        name_ph:"First name",
+        lastname_ph:"Last name",
+        password_rules:"Password (6+ chars incl. numbers)",
+        confirm_password_ph:"Confirm password",
+        captcha_title:"Type the following number in French:",
+        captcha_equals:"= ? (in French)",
+        captcha_ph:"Type the French word",
+        register_btn:"Register",
+        back_to_login:"Back to sign in",
+        nav_official:"Official Page",
+        nav_services:"My Services",
+        nav_contact:"Contact Us",
+        nav_logout:"Log Out",
+        official_title:"Welcome to our educational platform",
+        official_paragraph:
+          "Education is the foundation of progress. Through learning we gain the skills and knowledge " +
+          "to face future challenges. Our platform delivers purposeful, accessible content for everyone—" +
+          "articles, video lessons, and interactive exercises that guide learners step by step. Our vision " +
+          "is learning available to all, anytime and anywhere.",
+        services_title:"My Services",
+        services_list:[
+          "📚 Free online lessons",
+          "📝 Practice quizzes",
+          "🎥 Educational videos",
+          "💬 Discussion forum",
+          "🎯 Personalized learning plans"
+        ],
+        contact_title:"Contact Us",
+        contact_ph:"Write your message here...",
+        contact_send:"Send",
+        contact_ok:"Your message has been sent! We’ll get back to you soon.",
+        err_email:"Please enter a valid email address",
+        err_pw:"Password must be at least 6 characters and include letters and numbers",
+        err_pw_match:"Password confirmation does not match",
+        err_age:"You must be at least 10 years old to register",
+        err_captcha:"Human check failed. Try again.",
+        reg_ok:"Account created successfully!",
+        login_err:"Incorrect email or password"
+      },
+      fr:{
+        site_title:"Site Éducatif",
+        lang_label:"Langue :",
+        login_title:"Connexion",
+        email_ph:"E-mail",
+        password_ph:"Mot de passe",
+        remember:"Se souvenir de moi",
+        login_btn:"Se connecter",
+        no_account:"Pas de compte ?",
+        create_account:"Créer un compte",
+        register_title:"Créer un compte",
+        name_ph:"Prénom",
+        lastname_ph:"Nom",
+        password_rules:"Mot de passe (6+ caractères avec chiffres)",
+        confirm_password_ph:"Confirmez le mot de passe",
+        captcha_title:"Écrivez le nombre suivant en français :",
+        captcha_equals:"= ? (en français)",
+        captcha_ph:"Tapez le mot français",
+        register_btn:"S’inscrire",
+        back_to_login:"Retour à la connexion",
+        nav_official:"Page Officielle",
+        nav_services:"Mes Services",
+        nav_contact:"Contact",
+        nav_logout:"Déconnexion",
+        official_title:"Bienvenue sur notre plateforme éducative",
+        official_paragraph:
+          "L’éducation est le pilier du progrès. Grâce à l’apprentissage, nous acquérons les compétences et " +
+          "les connaissances nécessaires pour relever les défis de demain. Notre plateforme propose un contenu " +
+          "utile et accessible à tous : articles, vidéos pédagogiques et exercices interactifs. Notre vision : " +
+          "un apprentissage disponible pour chacun, à tout moment et en tout lieu.",
+        services_title:"Mes Services",
+        services_list:[
+          "📚 Cours en ligne gratuits",
+          "📝 Quiz d’entraînement",
+          "🎥 Vidéos éducatives",
+          "💬 Forum de discussion",
+          "🎯 Plans d’apprentissage personnalisés"
+        ],
+        contact_title:"Contact",
+        contact_ph:"Écrivez votre message ici...",
+        contact_send:"Envoyer",
+        contact_ok:"Votre message a été envoyé ! Nous vous répondrons bientôt.",
+        err_email:"Veuillez saisir une adresse e-mail valide",
+        err_pw:"Le mot de passe doit comporter au moins 6 caractères et inclure des lettres et des chiffres",
+        err_pw_match:"La confirmation du mot de passe ne correspond pas",
+        err_age:"Vous devez avoir au moins 10 ans pour vous inscrire",
+        err_captcha:"Échec du test humain. Réessayez.",
+        reg_ok:"Compte créé avec succès !",
+        login_err:"E-mail ou mot de passe incorrect"
+      }
+    };
+
+    /* ألوان حسب اللغة:
+       - العربية: أزرق  (افتراضي)
+       - الإنجليزية: أحمر
+       - الفرنسية: أخضر
+    */
+    const themes = {
+      ar:{primary:"#007bff", dark:"#0056b3", bg:"#e6f0ff"},
+      en:{primary:"#d32f2f", dark:"#9a0007", bg:"#ffecec"},
+      fr:{primary:"#2e7d32", dark:"#1b5e20", bg:"#eaf7eb"}
+    };
+
+    // اتجاه الصفحة لكل لغة
+    const directions = { ar:"rtl", en:"ltr", fr:"ltr" };
+
+    // أرقام فرنسية لاختبار الإنسان
+    const numbersFR = ["un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix"];
+    let captchaWord = "";
+
+    // مفاتيح الحقول ذات placeholder
+    function applyPlaceholders(scope=document){
+      scope.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+        const key=el.getAttribute("data-i18n-ph");
+        el.placeholder = t(key);
+      });
+    }
+
+    function t(key){ return (i18n[currentLang] && i18n[currentLang][key]) || key; }
+
+    function setTheme(lang){
+      const th = themes[lang];
+      document.documentElement.style.setProperty("--primary", th.primary);
+      document.documentElement.style.setProperty("--primary-dark", th.dark);
+      document.documentElement.style.setProperty("--bg", th.bg);
+    }
+
+    function setDir(lang){
+      const d = directions[lang] || "rtl";
+      document.documentElement.setAttribute("dir", d);
+      document.documentElement.setAttribute("lang", lang);
+      // اضبط محاذاة الفقرة الرسمية حسب الاتجاه
+      const p = document.querySelector("#official-page p");
+      if (p){
+        p.classList.remove("rtl","ltr");
+        p.classList.add(d==="rtl"?"rtl":"ltr");
+      }
+    }
+
+    function translateAll(){
+      // عناصر النص
+      document.querySelectorAll("[data-i18n]").forEach(el=>{
+        const key = el.getAttribute("data-i18n");
+        el.textContent = t(key);
+      });
+      // العنوان
+      document.getElementById("site-title").textContent = t("site_title");
+      document.getElementById("lang-label").textContent = t("lang_label");
+      // المقال
+      document.querySelector("#official-page h2").textContent = t("official_title");
+      document.querySelector("#official-page p").textContent = t("official_paragraph");
+      // الخدمات
+      const list = document.getElementById("services-list");
+      list.innerHTML = "";
+      (i18n[currentLang].services_list||[]).forEach(item=>{
+        const li=document.createElement("li"); li.textContent=item; list.appendChild(li);
+      });
+      // نص معادلة الكابتشا (1..10) = ؟
+      updateCaptchaQuestion();
+      // أماكن الإدخال
+      applyPlaceholders(document);
+    }
+
+    function updateCaptchaQuestion(){
+      // مثال: "5 = ؟ (بالفرنسية)" بحسب اللغة
+      const idx = numbersFR.indexOf(captchaWord);
+      const num = (idx>=0 ? (idx+1) : Math.floor(Math.random()*10)+1);
+      document.getElementById("captcha-question").textContent = `${num} ${t("captcha_equals")}`;
+    }
+
+    function generateCaptcha(){
+      const rnd = Math.floor(Math.random()*10);
+      captchaWord = numbersFR[rnd];
+      updateCaptchaQuestion();
+    }
+
+    function gotoRegister(){
+      generateCaptcha();
+      showSection("register-section");
+    }
+
+    function showSection(id){
+      document.querySelectorAll("section").forEach(s=>s.style.display="none");
+      document.getElementById(id).style.display="block";
+    }
+
+    function showInnerPage(id){
+      document.querySelectorAll(".inner .inner-page").forEach(p=>p.style.display="none");
+      document.getElementById(id).style.display="block";
+    }
+
+    function validateEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    function validatePassword(pw){
+      return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(pw);
+    }
+    function calculateAge(dateStr){
+      const diff = Date.now() - new Date(dateStr).getTime();
+      return new Date(diff).getUTCFullYear()-1970;
+    }
+
+    function register(){
+      const name = document.getElementById("reg-name").value.trim();
+      const lastname = document.getElementById("reg-lastname").value.trim();
+      const birthdate = document.getElementById("birthdate").value;
+      const email = document.getElementById("reg-email").value.trim();
+      const pw = document.getElementById("reg-password").value;
+      const pw2 = document.getElementById("reg-confirm-password").value;
+      const cap = document.getElementById("captcha-answer").value.trim().toLowerCase();
+
+      if(!validateEmail(email)) return alert(t("err_email"));
+      if(!validatePassword(pw)) return alert(t("err_pw"));
+      if(pw!==pw2) return alert(t("err_pw_match"));
+      if(calculateAge(birthdate)<10) return alert(t("err_age"));
+      if(cap!==captchaWord){ alert(t("err_captcha")); generateCaptcha(); return; }
+
+      // حفظ بسيط (من دون خادم)
+      sessionStorage.setItem("name", name);
+      sessionStorage.setItem("lastname", lastname);
+      sessionStorage.setItem("birthdate", birthdate);
+      sessionStorage.setItem("email", email);
+      sessionStorage.setItem("password", pw);
+
+      alert(t("reg_ok"));
+      showSection("login-section");
+    }
+
+    function login(){
+      const email = document.getElementById("login-email").value.trim();
+      const pw = document.getElementById("login-password").value;
+      const remember = document.getElementById("remember").checked;
+
+      if(email===sessionStorage.getItem("email") && pw===sessionStorage.getItem("password")){
+        if(remember){
+          localStorage.setItem("email", email);
+          localStorage.setItem("password", pw);
+          localStorage.setItem("remember", "true");
+        }else{
+          localStorage.removeItem("email");
+          localStorage.removeItem("password");
+          localStorage.setItem("remember", "false");
+        }
+        showSection("main-section");
+        showInnerPage("official-page");
+      }else{
+        alert(t("login_err"));
+      }
+    }
+
+    function logout(){
+      showSection("login-section");
+    }
+
+    function sendMessage(){
+      const msg = document.getElementById("contact-msg").value.trim();
+      const status = document.getElementById("contact-status");
+      if(!msg){ status.textContent = ""; return alert("✍️"); }
+      status.textContent = t("contact_ok");
+      document.getElementById("contact-msg").value="";
+    }
+
+    // إعداد اللغة + الألوان + الاتجاه
+    let currentLang = "ar";
+    function setLanguage(lang){
+      currentLang = lang;
+      setTheme(lang);
+      setDir(lang);
+      translateAll();
+    }
+
+    // تهيئة أولية
+    document.addEventListener("DOMContentLoaded", ()=>{
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("birthdate").setAttribute("max", today);
+
+      // تذكّر المستخدم
+      if(localStorage.getItem("remember")==="true"){
+        document.getElementById("login-email").value = localStorage.getItem("email")||"";
+        document.getElementById("login-password").value = localStorage.getItem("password")||"";
+        document.getElementById("remember").checked = true;
+      }
+
+      // لغة افتراضية عربية (أزرق)
+      setLanguage("ar");
+      // كابتشا أولية
+      generateCaptcha();
+    });
+  </script>
+</body>
+</html>
